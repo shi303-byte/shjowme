@@ -3,8 +3,9 @@
 <link rel="stylesheet" href="/static/style.css"></head>
 <body class="pf fx-{{ u.effect }}" style="--bg:{{ th[0] }};--fg:{{ th[1] }};--cd:{{ th[2] }};--ac:{{ u.accent }};--blur:{{ u.blur }}px;--op:{{ u.opacity }}%;--rad:{{ u.radius }}px;--ff:{{ fonts[u.font] }}">
 {% include "_icons.html" %}
-{% if u.music %}<div id="gate"><button id="enter">click to enter</button></div>{% endif %}
-{% if u.bg %}{% if u.bg.endswith(('.mp4','.webm')) %}<div class="bgl"><video src="/u/{{ u.bg }}" autoplay muted loop playsinline></video></div>{% else %}<div class="bgl" style="background-image:url(/u/{{ u.bg }})"></div>{% endif %}{% endif %}
+{% set vid = u.bg and u.bg.endswith(('.mp4','.webm')) %}
+{% if u.music or vid %}<div id="gate"><button id="enter">click to enter</button></div>{% endif %}
+{% if u.bg %}{% if vid %}<div class="bgl"><video id="bv" src="/u/{{ u.bg }}" loop playsinline preload="auto"></video></div>{% else %}<div class="bgl" style="background-image:url(/u/{{ u.bg }})"></div>{% endif %}{% endif %}
 <div class="fx"></div>
 <article class="card c-{{ u.card }} l-{{ u.layout }}">
 {% if u.banner %}<div class="ban" style="background-image:url(/u/{{ u.banner }})"></div>{% endif %}
@@ -12,14 +13,23 @@
 <div><h1>{{ u.display or u.username }}{% if u.role=='owner' %}<span class="bdg" title="Owner of ShjowMe"><svg class="ic"><use href="#i-crown"/></svg> owner</span>{% elif u.role=='staff' %}<span class="bdg s" title="ShjowMe staff"><svg class="ic"><use href="#i-shield"/></svg> staff</span>{% endif %}</h1>{% if u.tagline %}<div class="tag">{{ u.tagline }}</div>{% endif %}{% if u.location %}<div class="tag"><svg class="ic"><use href="#i-pin"/></svg>{{ u.location }}</div>{% endif %}</div></div>
 {% if u.bio %}<p class="bio" id="bio" data-t="{{ u.typewriter }}">{{ u.bio }}</p>{% endif %}
 {% if socials %}<div class="sls">{% for s in socials %}<a class="sl" href="/go/{{ s.id }}" target="_blank" rel="noopener nofollow ugc"><i><svg class="ic"><use href="#i-{{ s.kind }}"/></svg></i>{{ soc[s.kind] }}</a>{% endfor %}</div>{% endif %}
-{% if u.music %}<div class="pl"><button id="pp" aria-label="Play or pause"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path id="ic" d="M3 1l8 5-8 5z"/></svg></button><span>{{ u.music_title or 'now playing' }}</span><svg class="ic"><use href="#i-vol"/></svg><input id="vol" type="range" min="0" max="100" value="60" aria-label="Volume"><audio id="au" src="/u/{{ u.music }}" loop preload="auto"></audio></div>{% endif %}
+{% if u.music or vid %}<div class="pl"><button id="pp" aria-label="Play or pause"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path id="ic" d="M3 1l8 5-8 5z"/></svg></button><span>{{ u.music_title or 'now playing' }}</span><svg class="ic"><use href="#i-vol"/></svg><input id="vol" type="range" min="0" max="100" value="60" aria-label="Volume">{% if u.music %}<audio id="au" src="/u/{{ u.music }}" loop preload="auto"></audio>{% endif %}</div>{% endif %}
 <div class="foot">{% if u.show_views %}<span><svg class="ic"><use href="#i-eye"/></svg>{{ u.views }} views</span>{% endif %}<span>on ShjowMe</span></div></div>
 </article>
 <script>
-(function(){var b=document.getElementById('bio');if(b&&b.dataset.t==='1'){var s=b.textContent,i=0;b.textContent='';(function t(){if(i<=s.length){b.textContent=s.slice(0,i++);setTimeout(t,28)}})()}
-var a=document.getElementById('au');if(!a)return;var ic=document.getElementById('ic'),P='M3 1l8 5-8 5z',Q='M2 1h3v10H2zM7 1h3v10H7z';
-function sync(){ic.setAttribute('d',a.paused?P:Q)}a.volume=.6;a.addEventListener('play',sync);a.addEventListener('pause',sync);
-document.getElementById('enter').onclick=function(){document.getElementById('gate').remove();a.play().catch(function(){})};
-document.getElementById('pp').onclick=function(){a.paused?a.play():a.pause()};
-document.getElementById('vol').oninput=function(){a.volume=this.value/100}})();
+(function(){
+var b=document.getElementById('bio');
+function typeBio(){if(b&&b.dataset.t==='1'){var s=b.textContent,i=0;b.textContent='';(function t(){if(i<=s.length){b.textContent=s.slice(0,i++);setTimeout(t,28)}})()}}
+var a=document.getElementById('au'),v=document.getElementById('bv'),m=[a,v].filter(Boolean);
+if(!m.length){typeBio();return}
+var ic=document.getElementById('ic'),P='M3 1l8 5-8 5z',Q='M2 1h3v10H2zM7 1h3v10H7z';
+function idle(){return m.every(function(x){return x.paused})}
+function sync(){ic.setAttribute('d',idle()?P:Q)}
+m.forEach(function(x){x.volume=.6;x.addEventListener('play',sync);x.addEventListener('pause',sync)});
+function start(){m.forEach(function(x){try{x.currentTime=0}catch(e){}});return Promise.all(m.map(function(x){return x.play().catch(function(){})}))}
+if(a&&v){var last=0;v.addEventListener('timeupdate',function(){if(v.currentTime<last-.5&&Math.abs(a.duration-v.duration)<1.5){a.currentTime=v.currentTime}last=v.currentTime})}
+document.getElementById('enter').onclick=function(){document.getElementById('gate').remove();start();typeBio()};
+document.getElementById('pp').onclick=function(){if(idle()){Promise.all(m.map(function(x){return x.play().catch(function(){})}))}else{m.forEach(function(x){x.pause()})}};
+document.getElementById('vol').oninput=function(){var n=this.value/100;m.forEach(function(x){x.volume=n})};
+})();
 </script></body></html>
