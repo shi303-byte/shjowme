@@ -1,0 +1,6 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{% block title %}ShjowMe{% endblock %}</title><link rel="stylesheet" href="/static/style.css">{% block head %}{% endblock %}</head><body>
+{% include "_icons.html" %}
+<header class="top"><a class="logo" href="/"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="11" r="6"/><circle cx="14" cy="11" r="6" stroke="#b79cff"/></svg>ShjowMe</a>
+<nav>{% if me %}<a href="/dash">dashboard</a>{% if me.role in ('owner','staff') %}<a href="/admin">admin</a>{% endif %}<a href="/usr/{{ me.username }}">my page</a><form method="post" action="/logout">{{ T }}<button class="ln">log out</button></form>{% else %}<a href="/login">log in</a><a class="pill" href="/register">make yours</a>{% endif %}</nav></header>
+{% with m = get_flashed_messages() %}{% if m %}<div class="flash">{% for x in m %}<p>{{ x }}</p>{% endfor %}</div>{% endif %}{% endwith %}
+<main>{% block body %}{% endblock %}</main></body></html>

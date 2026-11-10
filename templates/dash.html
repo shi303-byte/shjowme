@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · ShjowMe{% endblock %}
+{% block body %}
+<div class="dw">
+<nav class="rail"><a href="#look"><svg class="ic"><use href="#i-look"/></svg> Look</a><a href="#media"><svg class="ic"><use href="#i-media"/></svg> Media</a><a href="#links"><svg class="ic"><use href="#i-link"/></svg> Socials</a><a href="#invites"><svg class="ic"><use href="#i-mail"/></svg> Invites</a><a href="#stats"><svg class="ic"><use href="#i-stats"/></svg> Analytics</a><a href="#account"><svg class="ic"><use href="#i-user"/></svg> Account</a><a href="/usr/{{ me.username }}" target="_blank"><svg class="ic"><use href="#i-out"/></svg> My page</a></nav>
+<div>
+<section class="sec" id="look"><h2>Look</h2><p>{{ request.host }}/usr/{{ me.username }}</p>
+<form method="post" action="/dash/profile">{{ T }}
+<div class="g2"><div><label>Display name</label><input name="display" value="{{ me.display }}" maxlength="40"></div><div><label>Tagline</label><input name="tagline" value="{{ me.tagline }}" maxlength="80"></div>
+<div><label>Location</label><input name="location" value="{{ me.location }}" maxlength="40"></div><div><label>Song title</label><input name="music_title" value="{{ me.music_title }}" maxlength="60"></div></div>
+<label>Bio</label><textarea name="bio" maxlength="500">{{ me.bio }}</textarea>
+<div class="g2"><div><label>Theme</label><select name="theme">{% for k in themes %}<option {{ 'selected' if me.theme==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Accent</label><input type="color" name="accent" value="{{ me.accent }}"></div>
+<div><label>Font</label><select name="font">{% for k in fonts %}<option {{ 'selected' if me.font==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Layout</label><select name="layout">{% for k in ['left','center','split'] %}<option {{ 'selected' if me.layout==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Background effect</label><select name="effect">{% for k in ['none','grain','scan','glow','aurora'] %}<option {{ 'selected' if me.effect==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Card style</label><select name="card">{% for k in ['glass','solid','outline','bare'] %}<option {{ 'selected' if me.card==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Avatar shape</label><select name="shape">{% for k in ['round','soft','square'] %}<option {{ 'selected' if me.shape==k }}>{{ k }}</option>{% endfor %}</select></div>
+<div><label>Corner radius</label><input type="range" name="radius" min="0" max="48" value="{{ me.radius }}"></div>
+<div><label>Card blur</label><input type="range" name="blur" min="0" max="40" value="{{ me.blur }}"></div>
+<div><label>Card opacity</label><input type="range" name="opacity" min="0" max="100" value="{{ me.opacity }}"></div></div>
+<label class="chk"><input type="checkbox" name="typewriter" {{ 'checked' if me.typewriter }}>Type out the bio</label>
+<label class="chk"><input type="checkbox" name="show_views" {{ 'checked' if me.show_views }}>Show view count</label>
+<div class="row"><button class="btn">Save changes</button></div></form></section>
+<section class="sec" id="media"><h2>Media</h2><p>Images up to 8 MB, GIFs work for avatar and banner. Background takes video too. Music: 4 minutes max.</p>
+<form method="post" action="/dash/media" enctype="multipart/form-data">{{ T }}
+<div class="g2">{% for k,l in [('avatar','Avatar'),('banner','Banner'),('bg','Background'),('music','Music')] %}<div><label>{{ l }}{% if me[k] %} (set){% endif %}</label><input type="file" name="{{ k }}">{% if me[k] %}<label class="chk"><input type="checkbox" name="clear" value="{{ k }}">Remove current</label>{% endif %}</div>{% endfor %}</div>
+<div class="row"><button class="btn">Upload</button></div></form></section>
+<section class="sec" id="links"><h2>Socials</h2><p>Up to 12 links on your page.</p>
+{% for s in socials %}<div class="item"><div class="h"><b>{{ soc[s.kind] }}</b><form class="inl" method="post" action="/dash/social/{{ s.id }}/delete">{{ T }}<button class="btn g sm">Remove</button></form></div><span class="meta">{{ s.url }}</span></div>{% endfor %}
+<form method="post" action="/dash/social">{{ T }}<div class="g2"><div><label>Platform</label><select name="kind">{% for k,v in soc.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div><div><label>Link</label><input name="url" placeholder="https://" required></div></div><div class="row"><button class="btn">Add link</button></div></form></section>
+<section class="sec" id="invites"><h2>Invites</h2><p>Paste a Discord invite and pick the name it lives under.</p>
+{% for i in inv %}<div class="item"><div class="h"><b>/inv/{{ i.slug }}</b><span class="st {{ i.status }}"><svg class="ic"><use href="#i-{{ {'active':'ok','expired':'no'}.get(i.status,'dash') }}"/></svg>{{ i.status }}</span></div>
+<p class="meta">{{ i.guild or 'Server name unavailable' }}{% if i.members %} · {{ '{:,}'.format(i.members) }} members{% endif %} · {{ i.clicks }} clicks</p>
+<div class="bars" title="Last 14 days">{% for v,h in i.bars %}<i style="height:{{ h }}%" title="{{ v }}"></i>{% endfor %}</div><span class="meta">last 14 days</span>
+<div class="row" style="margin-top:12px"><a class="btn g sm" href="/inv/{{ i.slug }}" target="_blank">Open</a>
+<form class="inl" method="post" action="/dash/invite/{{ i.id }}/check">{{ T }}<button class="btn g sm">Check now</button></form>
+<form class="inl" method="post" action="/dash/invite/{{ i.id }}/delete">{{ T }}<button class="btn g sm">Delete</button></form></div>
+{% if i.status=='expired' %}<form method="post" action="/dash/invite/{{ i.id }}/replace">{{ T }}<label>Swap in a new invite</label><input name="link" placeholder="discord.gg/..." required><div class="row"><button class="btn sm">Replace</button></div></form>{% endif %}</div>{% endfor %}
+<form method="post" action="/dash/invite">{{ T }}<div class="g2"><div><label>Discord invite</label><input name="link" placeholder="discord.gg/abc123" required></div><div><label>Custom name</label><input name="slug" placeholder="my-server" required maxlength="32"></div></div><label>Label (optional)</label><input name="title" maxlength="60"><div class="row"><button class="btn">Create invite</button></div></form></section>
+<section class="sec" id="stats"><h2>Analytics</h2><p>Last 30 days. Visits from bots and from you aren't counted.</p>
+<div class="sm2"><div><div class="big">{{ an.v30 }}</div><span class="meta">profile views</span></div><div><div class="big">{{ an.j30 }}</div><span class="meta">invite clicks</span></div></div>
+<div class="bars" title="Profile views, last 14 days">{% for v,h in an.vbars %}<i style="height:{{ h }}%" title="{{ v }}"></i>{% endfor %}</div><span class="meta">profile views, last 14 days</span>
+<div class="sm2" style="margin-top:18px">
+<div><label>Where views came from</label><table>{% for r in an.vrefs %}<tr><td>{{ r.k or 'direct' }}</td><td>{{ r.c }}</td></tr>{% else %}<tr><td class="meta">Nothing yet</td></tr>{% endfor %}</table></div>
+<div><label>Where invite clicks came from</label><table>{% for r in an.jrefs %}<tr><td>{{ r.k or 'direct' }}</td><td>{{ r.c }}</td></tr>{% else %}<tr><td class="meta">Nothing yet</td></tr>{% endfor %}</table></div>
+<div><label>Devices</label><table>{% for r in an.devs %}<tr><td>{{ r.k }}</td><td>{{ r.c }}</td></tr>{% else %}<tr><td class="meta">Nothing yet</td></tr>{% endfor %}</table></div>
+<div><label>Social link clicks</label><table>{% for r in an.links %}<tr><td>{{ soc[r.k] }}</td><td>{{ r.c }}</td></tr>{% else %}<tr><td class="meta">No links yet</td></tr>{% endfor %}</table></div></div></section>
+<section class="sec" id="account"><h2>Account</h2>
+<form method="post" action="/dash/password">{{ T }}<div class="g2"><div><label>Current password</label><input type="password" name="old" required autocomplete="current-password"></div><div><label>New password</label><input type="password" name="new" required minlength="8" autocomplete="new-password"></div></div><div class="row"><button class="btn">Change password</button></div></form></section>
+</div></div>
+{% endblock %}

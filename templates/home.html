@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="hero">
+<h1>one link for who you are. <span>another for where you hang out.</span></h1>
+<div class="url"><i>{{ request.host }}/</i><b>usr</b><i>/</i>you &nbsp; <i>{{ request.host }}/</i><b>inv</b><i>/</i>your-server</div>
+<p>A page that looks like you, and Discord invites with a name people can remember. You'll know how many people actually clicked.</p>
+<div class="row"><a class="btn" href="/register">Create your page</a><a class="btn g" href="/login">I have an account</a></div>
+<div class="cols">
+<div><svg class="ic" style="width:24px;height:24px;color:var(--a)"><use href="#i-user"/></svg><h3>Profiles that don't look alike</h3><p>Themes, fonts, a background that moves, a banner, an avatar that animates, and a song up to four minutes.</p></div>
+<div><svg class="ic" style="width:24px;height:24px;color:var(--a)"><use href="#i-mail"/></svg><h3>Invites that say they're alive</h3><p>Every short link is checked against Discord. When one expires you see it before your members do.</p></div>
+<div><svg class="ic" style="width:24px;height:24px;color:var(--a)"><use href="#i-stats"/></svg><h3>Counts you can trust</h3><p>Clicks per day for each invite. Link previews and bots are left out of the numbers.</p></div>
+</div>
+<p class="stat">{{ n.u }} people, {{ n.i }} invites, {{ n.c }} joins sent so far.</p>
+</section>
+{% endblock %}

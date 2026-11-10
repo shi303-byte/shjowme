@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Admin · ShjowMe{% endblock %}
+{% block body %}
+<section class="sec"><h2>Site</h2><p>{{ tot.u }} people, {{ tot.i }} invites, {{ tot.c }} invite clicks, {{ tot.v }} profile views.</p>
+<form method="get" style="max-width:340px"><label>Find a user</label><input name="q" value="{{ q }}" placeholder="username"></form>
+<table><tr><th>User</th><th>Role</th><th>Views</th><th>Invites</th><th></th></tr>
+{% for r in rows %}<tr><td><a href="/usr/{{ r.username }}">{{ r.username }}</a>{% if r.banned %} <span class="st expired">banned</span>{% endif %}</td><td>{{ r.role }}</td><td>{{ r.views }}</td><td>{{ r.ic }}</td>
+<td>{% if r.role!='owner' and r.id!=me.id and (r.role!='staff' or me.role=='owner') %}
+<form class="inl" method="post" action="/admin/{{ r.id }}/ban">{{ T }}<button class="btn g sm">{{ 'Unban' if r.banned else 'Ban' }}</button></form>
+{% if me.role=='owner' %}<form class="inl" method="post" action="/admin/{{ r.id }}/{{ 'demote' if r.role=='staff' else 'promote' }}">{{ T }}<button class="btn g sm">{{ 'Remove staff' if r.role=='staff' else 'Make staff' }}</button></form>
+<form class="inl" method="post" action="/admin/{{ r.id }}/reset" onsubmit="return confirm('Generate a new temporary password for this account?')">{{ T }}<button class="btn g sm">Reset password</button></form>
+<form class="inl" method="post" action="/admin/{{ r.id }}/delete" onsubmit="return confirm('Delete this account and everything on it?')">{{ T }}<button class="btn g sm">Delete</button></form>{% endif %}{% endif %}</td></tr>{% endfor %}</table></section>
+<section class="sec"><h2>Latest invites</h2><table><tr><th>Name</th><th>Owner</th><th>Status</th><th>Clicks</th><th></th></tr>
+{% for i in inv %}<tr><td><a href="/inv/{{ i.slug }}">/inv/{{ i.slug }}</a></td><td>{{ i.username }}</td><td>{{ i.status }}</td><td>{{ i.clicks }}</td><td><form class="inl" method="post" action="/admin/invite/{{ i.id }}/delete" onsubmit="return confirm('Delete this invite?')">{{ T }}<button class="btn g sm">Delete</button></form></td></tr>{% endfor %}</table></section>
+{% endblock %}

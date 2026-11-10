@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Make your page' if mode=='register' else 'Welcome back' }} · ShjowMe{% endblock %}
+{% block body %}
+<form class="auth" method="post">{{ T }}
+<h1>{{ 'Make your page' if mode=='register' else 'Welcome back' }}</h1>
+<label for="username">Username</label><input id="username" name="username" required minlength="3" maxlength="24" autocomplete="username" autofocus>
+<label for="password">Password</label><input id="password" type="password" name="password" required minlength="{{ 8 if mode=='register' else 1 }}" autocomplete="{{ 'new-password' if mode=='register' else 'current-password' }}">
+<button class="btn">{{ 'Create account' if mode=='register' else 'Log in' }}</button>
+<p class="meta" style="margin-top:18px">{% if mode=='register' %}Already here? <a href="/login">Log in</a>{% else %}New? <a href="/register">Make a page</a>{% endif %}</p>
+</form>
+{% endblock %}

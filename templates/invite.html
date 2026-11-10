@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Join {{ i.guild or i.title or i.slug }}{% endblock %}
+{% block head %}<meta property="og:title" content="Join {{ i.guild or i.title or i.slug }}"><meta property="og:description" content="{{ '{:,} members, {:,} online'.format(i.members, i.online) if i.members else 'You have been invited to a Discord server.' }}"><meta property="og:site_name" content="ShjowMe"><meta name="theme-color" content="#b79cff">{% endblock %}
+{% block body %}<div class="cen"><div class="ib">
+<span class="meta">You're invited to</span>
+<h1>{{ i.guild or i.title or i.slug }}</h1>
+{% if i.title and i.guild %}<p class="meta" style="margin:0">{{ i.title }}</p>{% endif %}
+{% if i.members %}<p class="meta" style="margin:8px 0 0">{{ '{:,}'.format(i.members) }} members, {{ '{:,}'.format(i.online) }} online</p>{% endif %}
+<a class="btn" id="go" href="https://discord.gg/{{ i.code }}" rel="noopener">Join on Discord</a>
+<p class="meta" style="margin-top:18px">Shared by <a href="/usr/{{ o.username }}">{{ o.display or o.username }}</a>{% if o.role=='owner' %} <span class="bdg"><svg class="ic"><use href="#i-crown"/></svg> owner</span>{% elif o.role=='staff' %} <span class="bdg s"><svg class="ic"><use href="#i-shield"/></svg> staff</span>{% endif %}</p>
+</div></div><script>setTimeout(function(){location.href=document.getElementById('go').href},2200)</script>{% endblock %}
